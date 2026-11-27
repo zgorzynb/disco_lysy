@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Disco Łysy</title>
+  <meta name="description" content="Losowe utwory z playlisty YouTube do treningu West Coast Swing">
+  <meta name="theme-color" content="#14121f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Disco Łysy">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <h1>Disco Łysy</h1>
+    <span id="wakeBadge" class="badge" hidden>Ekran nie zgaśnie</span>
+  </header>
+
+  <main>
+    <!-- Playlista -->
+    <section class="card setup" id="playlistCard">
+      <label for="playlistUrl">Link do playlisty YouTube / YouTube Music</label>
+      <div class="row">
+        <input id="playlistUrl" type="url" inputmode="url" autocomplete="off"
+               placeholder="https://music.youtube.com/playlist?list=…">
+        <button id="loadBtn" class="secondary">Wczytaj</button>
+      </div>
+      <p id="playlistInfo" class="hint">Playlista musi być publiczna albo niepubliczna (z linkiem).</p>
+      <div id="savedWrap" hidden>
+        <label for="savedSelect">Zapisane playlisty</label>
+        <div class="row">
+          <select id="savedSelect"></select>
+          <button id="deleteSavedBtn" class="ghost" title="Usuń z listy">Usuń</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Ustawienia -->
+    <section class="card setup">
+      <div class="grid3">
+        <label>Ile utworów
+          <input id="trackCount" type="number" min="1" max="20" step="1" value="3">
+        </label>
+        <label>Czas utworu (s)
+          <input id="trackDuration" type="number" min="10" max="600" step="5" value="90">
+        </label>
+        <label>Pauza (s)
+          <input id="pauseDuration" type="number" min="0" max="300" step="1" value="10">
+        </label>
+      </div>
+      <label class="check">
+        <input id="fadeOut" type="checkbox" checked> Wycisz łagodnie ostatnie 3 sekundy
+      </label>
+    </section>
+
+    <!-- Odtwarzacz -->
+    <section class="card stage">
+      <div id="status" class="status">Wczytaj playlistę i naciśnij Start</div>
+      <div id="bigTimer" class="big-timer">–</div>
+      <div id="trackTitle" class="track-title"></div>
+      <ol id="queue" class="queue"></ol>
+      <div class="controls">
+        <button id="startBtn" class="primary" disabled>Start</button>
+        <button id="skipBtn" class="secondary" disabled>Następny</button>
+        <button id="stopBtn" class="ghost" disabled>Stop</button>
+      </div>
+      <div class="player-wrap">
+        <div id="player"></div>
+      </div>
+    </section>
+
+    <footer class="foot">
+      Muzyka odtwarzana przez oficjalny odtwarzacz YouTube. Bez YouTube Premium mogą pojawić się reklamy;
+      czas utworu liczy się dopiero, gdy leci muzyka.
+    </footer>
+  </main>
+
+  <script src="app.js"></script>
+  <script src="https://www.youtube.com/iframe_api"></script>
+</body>
+</html>
