@@ -27,6 +27,7 @@ więc można go wysłać innym instruktorom.
 - Czas utworu liczy się z pozycji odtwarzania, dlatego reklamy i buforowanie nie zjadają czasu.
 - Utwory, których właściciel zablokował odtwarzanie poza YouTube, są pomijane i zastępowane innymi.
 - Ostatnie 3 sekundy są łagodnie wyciszane (można wyłączyć).
+- W czasie pauzy następny utwór wczytuje się po cichu (razem z ewentualną reklamą), więc po pauzie rusza od razu.
 
 ## Reklamy i YouTube Premium
 
