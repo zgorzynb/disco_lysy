@@ -47,6 +47,7 @@ const session = {
   trackLoadedAt: 0,
   skipped: 0,
   settings: null,
+  preload: null, // { id, ready } – następny utwór wczytywany w czasie pauzy
 };
 
 /* ---------- Pamięć lokalna (tylko ta przeglądarka) ---------- */
@@ -189,8 +190,20 @@ function onPlayerStateChange(e) {
 }
 
 function onPlayerError(e) {
-  if (session.phase !== 'loading' && session.phase !== 'playing') return;
   if (!SKIPPABLE_ERRORS.has(e.data)) return;
+  if (session.phase === 'pause' && session.preload) {
+    // Następny utwór nie chce się wczytać – podmieniamy go jeszcze w czasie pauzy.
+    session.skipped += 1;
+    const next = session.idx + 1;
+    const replacement = session.spare.pop();
+    if (replacement) session.queue[next] = replacement;
+    else session.queue.splice(next, 1);
+    session.preload = null;
+    renderQueue();
+    preloadNext();
+    return;
+  }
+  if (session.phase !== 'loading' && session.phase !== 'playing') return;
   session.skipped += 1;
   const replacement = session.spare.pop();
   if (replacement) {
@@ -286,6 +299,7 @@ function playTrack(i) {
   els.trackTitle.textContent = '';
   setTimer(session.settings.duration, 'playing');
   setStatus(`Utwór ${i + 1}/${session.queue.length}: ładowanie…`);
+  session.preload = null;
   player.setVolume(100);
   player.unMute();
   // Wywołanie w obsłudze kliknięcia (Start) spełnia wymóg gestu użytkownika na iOS.
@@ -309,6 +323,39 @@ function finishTrack() {
   session.pauseEndsAt = Date.now() + pause * 1000;
   renderQueue();
   setStatus(`Pauza – następny utwór ${session.idx + 2}/${session.queue.length}`);
+  preloadNext();
+}
+
+// W czasie pauzy wczytujemy następny utwór po cichu: bufor (i ewentualna reklama)
+// zdążą się załadować, a po pauzie muzyka rusza od razu od początku.
+function preloadNext() {
+  const next = session.queue[session.idx + 1];
+  if (!next) { session.preload = null; return; }
+  session.preload = { id: next, ready: false };
+  player.mute();
+  player.loadVideoById({ videoId: next, startSeconds: 0 });
+}
+
+function startNext() {
+  const i = session.idx + 1;
+  if (i >= session.queue.length) { endSession(); return; }
+  const pre = session.preload;
+  if (!pre || pre.id !== session.queue[i]) { playTrack(i); return; }
+  session.preload = null;
+  session.idx = i;
+  session.phase = 'loading';
+  session.trackLoadedAt = Date.now();
+  renderQueue();
+  els.trackTitle.textContent = '';
+  setTimer(session.settings.duration, 'playing');
+  setStatus(`Utwór ${i + 1}/${session.queue.length}: start…`);
+  player.setVolume(100);
+  player.unMute();
+  if (pre.ready) {
+    player.seekTo(0, true);
+    player.playVideo();
+  }
+  // Jeśli jeszcze się ładuje (np. trwa reklama), po prostu gra dalej z dźwiękiem.
 }
 
 function endSession() {
@@ -329,6 +376,7 @@ function stopSession(silent) {
   session.phase = 'idle';
   session.queue = [];
   session.spare = [];
+  session.preload = null;
   if (player && playerReady && wasActive) {
     try { player.stopVideo(); } catch (_) { /* nic */ }
   }
@@ -345,7 +393,7 @@ function stopSession(silent) {
 
 function skip() {
   if (session.phase === 'pause') {
-    playTrack(session.idx + 1);
+    startNext();
   } else if (session.phase === 'playing' || session.phase === 'loading') {
     finishTrack();
   }
@@ -394,7 +442,22 @@ function tick() {
   } else if (session.phase === 'pause') {
     const left = Math.max(0, session.pauseEndsAt - Date.now());
     setTimer(Math.ceil(left / 1000), 'pause');
-    if (left <= 0) playTrack(session.idx + 1);
+    const pre = session.preload;
+    if (pre && !pre.ready) {
+      try {
+        const data = player.getVideoData() || {};
+        const started = data.video_id === pre.id
+          && player.getPlayerState() === YT.PlayerState.PLAYING
+          && player.getCurrentTime() > 0;
+        if (started) {
+          // Muzyka ruszyła (po ewentualnej reklamie) – zatrzymujemy na początku i czekamy.
+          player.pauseVideo();
+          player.seekTo(0, true);
+          pre.ready = true;
+        }
+      } catch (_) { /* odtwarzacz jeszcze nie gotowy */ }
+    }
+    if (left <= 0) startNext();
   }
 }
 
