@@ -3,6 +3,8 @@
  * bez serwera, bez klucza API i bez logowania. */
 'use strict';
 
+const APP_VERSION = '1.2';
+
 const $ = (id) => document.getElementById(id);
 
 const els = {
@@ -351,11 +353,9 @@ function startNext() {
   setStatus(`Utwór ${i + 1}/${session.queue.length}: start…`);
   player.setVolume(100);
   player.unMute();
-  if (pre.ready) {
-    player.seekTo(0, true);
-    player.playVideo();
-  }
-  // Jeśli jeszcze się ładuje (np. trwa reklama), po prostu gra dalej z dźwiękiem.
+  if (pre.ready) player.seekTo(0, true);
+  // Gdy jeszcze się ładuje (np. trwa reklama), gra dalej – już z dźwiękiem.
+  player.playVideo();
 }
 
 function endSession() {
@@ -457,6 +457,9 @@ function tick() {
         }
       } catch (_) { /* odtwarzacz jeszcze nie gotowy */ }
     }
+    const nextNo = `${session.idx + 2}/${session.queue.length}`;
+    const preState = !pre ? '' : pre.ready ? ' · gotowy ✓' : ' · wczytuję…';
+    setStatus(`Pauza – następny utwór ${nextNo}${preState}`);
     if (left <= 0) startNext();
   }
 }
@@ -559,6 +562,7 @@ els.stopBtn.addEventListener('click', () => stopSession(false));
 /* ---------- Start ---------- */
 
 loadSettings();
+document.getElementById('version').textContent = `wersja ${APP_VERSION}`;
 const sharedList = new URLSearchParams(location.search).get('list');
 if (sharedList) els.playlistUrl.value = `https://music.youtube.com/playlist?list=${sharedList}`;
 renderSaved();
