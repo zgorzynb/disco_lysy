@@ -1,0 +1,224 @@
+:root {
+  --bg: #14121f;
+  --card: #1f1c30;
+  --line: #34304d;
+  --text: #f3f1fa;
+  --muted: #a9a4c4;
+  --accent: #ff4fa3;
+  --accent-2: #7c5cff;
+  --ok: #3ddc97;
+  --warn: #ffb020;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 14px 16px 4px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.top h1 {
+  margin: 0;
+  font-size: 1.35rem;
+  letter-spacing: .02em;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.badge {
+  font-size: .75rem;
+  color: var(--ok);
+  border: 1px solid var(--ok);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+main {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 8px 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+label {
+  display: block;
+  font-size: .85rem;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+}
+
+.row > input, .row > select { flex: 1; min-width: 0; }
+
+input, select {
+  width: 100%;
+  font: inherit;
+  font-size: 16px; /* brak zoomu na iOS */
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+input:focus, select:focus { outline: 2px solid var(--accent-2); outline-offset: 1px; }
+
+.grid3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.grid3 label { margin: 0; }
+.grid3 input { margin-top: 6px; text-align: center; }
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 0;
+  color: var(--text);
+}
+.check input { width: auto; }
+
+.hint { margin: 8px 0 0; font-size: .85rem; color: var(--muted); }
+.hint.ok { color: var(--ok); }
+.hint.err { color: var(--warn); }
+
+#savedWrap { margin-top: 12px; }
+
+button {
+  font: inherit;
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 10px 16px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+button:disabled { opacity: .4; cursor: default; }
+
+.primary { background: linear-gradient(90deg, var(--accent), var(--accent-2)); color: #fff; }
+.secondary { background: var(--line); color: var(--text); }
+.ghost { background: transparent; color: var(--muted); border-color: var(--line); }
+
+.stage { text-align: center; }
+
+.status {
+  font-size: 1rem;
+  color: var(--muted);
+  min-height: 1.4em;
+}
+
+.big-timer {
+  font-size: clamp(4rem, 22vw, 7rem);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.05;
+  margin: 4px 0;
+}
+.big-timer.pause { color: var(--warn); }
+.big-timer.playing { color: var(--ok); }
+
+.track-title {
+  min-height: 1.4em;
+  font-size: 1rem;
+  margin-bottom: 8px;
+  overflow-wrap: anywhere;
+}
+
+.queue {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 12px;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.queue li {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  font-size: .8rem;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  color: var(--muted);
+}
+.queue li.done { background: var(--line); color: var(--text); }
+.queue li.current { border-color: var(--accent); color: var(--text); box-shadow: 0 0 0 2px var(--accent) inset; }
+
+/* Odtwarzacz YouTube musi być widoczny (min. 200x200 wg zasad YouTube) */
+.player-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  min-height: 200px;
+  aspect-ratio: 16 / 9;
+  margin: 0 auto 12px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #000;
+}
+.player-wrap iframe, .player-wrap #player {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+body.running .setup { display: none; }
+
+.controls {
+  margin-bottom: 12px;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+.controls button { padding: 14px; font-size: 1.05rem; }
+.controls .primary { flex: 1; max-width: 240px; }
+
+.foot {
+  font-size: .75rem;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.4;
+}
+
+@media (max-width: 380px) {
+  .grid3 { gap: 6px; }
+  .grid3 label { font-size: .75rem; }
+}
